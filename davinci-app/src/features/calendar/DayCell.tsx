@@ -1,7 +1,8 @@
 import { memo } from 'react';
 import { pnlTint, tintBackground } from '../../lib/colorScale';
 import { fromUnits } from '../../lib/money';
-import { formatCompact, formatMoney, formatPercent } from '../../lib/format';
+import { formatMoney, formatPercent } from '../../lib/format';
+import { SplitAmount } from '../../components/Money';
 import type { DayStat } from '../../lib/aggregate';
 import type { GridCell } from '../../lib/time';
 import { strings, fmt } from '../../i18n';
@@ -65,9 +66,10 @@ export const DayCell = memo(function DayCell({ cell, stat, maxAbsU, digits, curr
     >
       <span className={`absolute left-1.5 top-1 num text-[11px] font-medium sm:left-2.5 sm:top-2 sm:text-[12px] ${isToday && !has ? 'text-accent' : has ? 'text-white' : muted ? 'text-faint' : 'text-muted'}`}>{cell.day}</span>
       {has && (
-        <div className={`absolute inset-x-1 bottom-1 flex flex-col items-end gap-0.5 sm:inset-x-2.5 sm:bottom-2 ${textTone}`}>
-          <span className="v-compact num max-w-full truncate text-[10.5px] font-semibold leading-none sm:text-[13px]">{formatCompact(net)}</span>
-          <span className="v-full num max-w-full truncate text-[14.5px] font-semibold leading-tight">{formatMoney(net, currency, { sign: true, digits: Math.abs(net) >= 1000 ? 0 : 2 })}</span>
+        <div className={`absolute inset-x-[2px] bottom-1.5 flex flex-col items-end gap-0.5 sm:inset-x-2.5 sm:bottom-2 ${textTone}`}>
+          <SplitAmount value={net} mode="narrow" className="v-narrow max-w-full text-[11px] font-semibold leading-none tracking-[-0.03em]" />
+          <SplitAmount value={net} mode="wide" className="v-wide max-w-full text-[13.5px] font-semibold leading-none tracking-[-0.01em]" />
+          <SplitAmount value={net} mode="wide" currency={currency} className="v-full max-w-full text-[15px] font-semibold leading-tight tracking-[-0.01em]" />
           <span className="v-count num max-w-full truncate text-[11px] leading-tight text-white">
             {fmt(strings.calendar.tradesN, { n: stat!.count })}
             {showWinRate && wr !== null && <span className="v-wr-inline"> · {formatPercent(wr, 0)}</span>}

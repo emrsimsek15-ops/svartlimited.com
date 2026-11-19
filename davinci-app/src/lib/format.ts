@@ -21,7 +21,7 @@ export function formatMoney(value: number, currency: string, opts: { sign?: bool
 }
 
 /**
- * Compact P&L for tight spaces: +1.2K, −350, +12K, +1.3M. Always ≤ 6 characters + sign.
+ * Compact P&L for tight spaces: +1,2K, −350, +12K, +1,3M (Turkish decimal comma). Always ≤ 6 characters.
  */
 export function formatCompact(value: number, opts: { sign?: boolean } = { sign: true }): string {
   const abs = Math.abs(value);
@@ -31,8 +31,8 @@ export function formatCompact(value: number, opts: { sign?: boolean } = { sign: 
   else if (abs < 1e6) body = scaled(abs / 1e3) + 'K';
   else if (abs < 1e9) body = scaled(abs / 1e6) + 'M';
   else body = scaled(abs / 1e9) + 'B';
-  if (body === '0' || body === '0.0') return '0';
-  return sign + body;
+  if (body === '0') return '0';
+  return sign + body.replace('.', ',');
 }
 
 function scaled(v: number): string {
@@ -82,4 +82,31 @@ import { tr as trLocale } from 'date-fns/locale';
 /** Date formatting in the user's timezone with the Turkish locale. */
 export function formatDate(ts: number, tz: string, pattern: string): string {
   return formatInTimeZone(ts, tz, pattern, { locale: trLocale });
+}
+
+export interface AmountParts {
+  /** Sign, optional currency symbol and grouped integer part, e.g. "+113", "−1.234", "+$549". */
+  main: string;
+  /** Decimal part including the separator, e.g. ",23" — rendered smaller. Empty when omitted. */
+  frac: string;
+}
+
+const intFmt = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 0, useGrouping: true });
+
+/**
+ * Splits an amount for calendar cells so the cents can be shown smaller next to the integer part.
+ * - `narrow` (phone cells): cents below 1.000; integer only below 10.000; compact above.
+ * - `wide` (tablet/desktop cells): cents below 1.000.000; compact above.
+ */
+export function amountParts(value: number, mode: 'narrow' | 'wide', currencySymbol = ''): AmountParts {
+  const cents = Math.round(Math.abs(value) * 100);
+  if (cents === 0) return { main: `${currencySymbol}0`, frac: ',00' };
+  const sign = value > 0 ? '+' : '−';
+  const abs = cents / 100;
+  const intPart = Math.floor(cents / 100);
+  const frac = ',' + String(cents % 100).padStart(2, '0');
+  const limitCents = mode === 'narrow' ? 1_000 : 1_000_000;
+  if (abs < limitCents) return { main: `${sign}${currencySymbol}${intFmt.format(intPart)}`, frac };
+  if (mode === 'narrow' && abs < 10_000) return { main: `${sign}${currencySymbol}${intFmt.format(Math.round(abs))}`, frac: '' };
+  return { main: formatCompact(value), frac: '' };
 }

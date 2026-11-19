@@ -77,7 +77,7 @@ export default function CalendarPage() {
       ) : (
         <>
           <MonthStats s={view.summary} digits={d.digits} currency={d.currency} />
-          <div className="card mt-3 overflow-hidden p-2 sm:mt-4 sm:p-4">
+          <div className="card mt-3 overflow-hidden p-1 pb-2 sm:mt-4 sm:p-4">
             <AnimatePresence mode="popLayout" initial={false} custom={dir}>
               <m.div
                 key={`${ym.y}-${ym.m}`}

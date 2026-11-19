@@ -71,17 +71,19 @@
 
   /* Calendar cells size their content with container queries so numbers never break the grid. */
   .cal-cell { container-type: inline-size; }
-  .cal-cell .v-full, .cal-cell .v-count, .cal-cell .v-wr { display: none; }
-  .cal-cell .v-dot { display: none; }
-  @container (max-width: 40px) {
-    .cal-cell .v-compact { display: none; }
+  .cal-cell .v-wide, .cal-cell .v-full, .cal-cell .v-count, .cal-cell .v-dot { display: none; }
+  @container (max-width: 36px) {
+    .cal-cell .v-narrow { display: none; }
     .cal-cell .v-dot { display: block; }
   }
-  @container (min-width: 76px) { .cal-cell .v-count { display: block; } }
-  @container (min-width: 118px) {
-    .cal-cell .v-full { display: block; }
-    .cal-cell .v-compact { display: none; }
-    .cal-cell .v-wr { display: block; }
+  @container (min-width: 76px) {
+    .cal-cell .v-narrow { display: none; }
+    .cal-cell .v-wide { display: inline-flex; }
+    .cal-cell .v-count { display: block; }
+  }
+  @container (min-width: 128px) {
+    .cal-cell .v-wide { display: none; }
+    .cal-cell .v-full { display: inline-flex; }
   }
 }
 
