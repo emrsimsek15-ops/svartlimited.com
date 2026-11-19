@@ -1,16 +1,16 @@
 import { describe, expect, it } from 'vitest';
-import { formatCompact } from './format';
+import { amountParts, formatCompact } from './format';
 import { pnlTint, MAX_ALPHA, MIN_ALPHA, RGB, blend, contrast } from './colorScale';
 
 describe('formatCompact', () => {
   it.each([
-    [1234, '+1.2K'],
+    [1234, '+1,2K'],
     [-350, '−350'],
     [12_500, '+13K'],
     [999_999, '+999K'],
-    [1_300_000, '+1.3M'],
+    [1_300_000, '+1,3M'],
     [0, '0'],
-    [5.25, '+5.3'],
+    [5.25, '+5,3'],
     [9_960, '+10K'],
     [-45.4, '−45'],
   ])('%d → %s', (v, out) => expect(formatCompact(v)).toBe(out));
@@ -20,6 +20,21 @@ describe('formatCompact', () => {
       expect(formatCompact(-v).length).toBeLessThanOrEqual(6);
     }
   });
+});
+
+describe('amountParts', () => {
+  it.each([
+    [113.23, 'narrow', '+113', ',23'],
+    [-96.36, 'narrow', '−96', ',36'],
+    [0.4, 'narrow', '+0', ',40'],
+    [999.995, 'narrow', '+1.000', ''],
+    [1234.56, 'narrow', '+1.235', ''],
+    [12_345.6, 'narrow', '+12K', ''],
+    [1234.56, 'wide', '+1.234', ',56'],
+    [-0.004, 'wide', '0', ',00'],
+    [2_500_000, 'wide', '+2,5M', ''],
+  ] as const)('%d %s → %s%s', (v, mode, main, frac) => expect(amountParts(v, mode)).toEqual({ main, frac }));
+  it('currency symbol goes after the sign', () => expect(amountParts(549.53, 'wide', '$')).toEqual({ main: '+$549', frac: ',53' }));
 });
 
 describe('pnlTint', () => {

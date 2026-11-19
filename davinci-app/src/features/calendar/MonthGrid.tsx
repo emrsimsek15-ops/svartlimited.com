@@ -2,10 +2,9 @@ import { Fragment } from 'react';
 import type { DayMap, MonthView } from '../../lib/aggregate';
 import { weekdayOrder } from '../../lib/time';
 import { fromUnits } from '../../lib/money';
-import { formatCompact, formatMoney } from '../../lib/format';
 import { strings, fmt } from '../../i18n';
 import { DayCell } from './DayCell';
-import { toneClass } from '../../components/Money';
+import { SplitAmount, toneClass } from '../../components/Money';
 
 export interface MonthGridProps {
   view: MonthView;
@@ -24,7 +23,7 @@ export function MonthGrid({ view, days, digits, currency, today, weekStartsOn, s
   const order = weekdayOrder(weekStartsOn);
   const weekCol = variant === 'full' && showWeeks;
   const cols = weekCol ? 'grid-cols-7 sm:grid-cols-[repeat(7,minmax(0,1fr))_minmax(0,1.05fr)]' : 'grid-cols-7';
-  const gap = variant === 'full' ? 'gap-1 sm:gap-1.5' : 'gap-1';
+  const gap = variant === 'full' ? 'gap-[3px] sm:gap-1.5' : 'gap-1';
 
   return (
     <div className="min-w-0">
@@ -72,8 +71,9 @@ function WeekCell({ index, netU, trades, tradingDays, digits, currency }: { inde
       </span>
       {trades > 0 ? (
         <div className="absolute inset-x-2.5 bottom-2 flex flex-col items-end gap-0.5">
-          <span className={`v-compact num max-w-full truncate text-[13px] font-semibold leading-none ${toneClass(v)}`}>{formatCompact(v)}</span>
-          <span className={`v-full num max-w-full truncate text-[14.5px] font-semibold leading-tight ${toneClass(v)}`}>{formatMoney(v, currency, { sign: true, digits: Math.abs(v) >= 1000 ? 0 : 2 })}</span>
+          <SplitAmount value={v} mode="narrow" className={`v-narrow max-w-full text-[12.5px] font-semibold leading-none ${toneClass(v)}`} />
+          <SplitAmount value={v} mode="wide" className={`v-wide max-w-full text-[13.5px] font-semibold leading-none ${toneClass(v)}`} />
+          <SplitAmount value={v} mode="wide" currency={currency} className={`v-full max-w-full text-[15px] font-semibold leading-tight ${toneClass(v)}`} />
           <span className="v-count num max-w-full truncate text-[11px] leading-tight text-muted">
             {fmt(strings.calendar.tradesN, { n: trades })} · {fmt(strings.calendar.daysN, { n: tradingDays })}
           </span>
@@ -89,18 +89,18 @@ function WeekCell({ index, netU, trades, tradingDays, digits, currency }: { inde
 export function WeekStrip({ view, digits }: { view: MonthView; digits: number }) {
   const weeks = view.weeks.filter((w) => w.hasMonthDays);
   return (
-    <div className="mt-3 sm:hidden">
+    <div className="mt-3 px-1 sm:hidden">
       <p className="label mb-1.5">{strings.calendar.weekTotals}</p>
       <div className="grid gap-1" style={{ gridTemplateColumns: `repeat(${weeks.length}, minmax(0, 1fr))` }}>
         {weeks.map((w) => {
           const v = fromUnits(w.netU, digits);
           return (
-            <div key={w.index} className="min-w-0 rounded-[8px] border border-line/[0.07] bg-surface px-1 py-1.5 text-center">
+            <div key={w.index} className="min-w-0 rounded-[8px] border border-line/[0.07] bg-surface px-0.5 py-1.5 text-center">
               <div className="text-[10px] text-muted">
                 {strings.calendar.weekShort}
                 {w.index + 1}
               </div>
-              <div className={`num truncate text-[12px] font-semibold ${w.trades ? toneClass(v) : 'text-faint'}`}>{w.trades ? formatCompact(v) : '—'}</div>
+              <div className={`truncate text-[11.5px] font-semibold ${w.trades ? toneClass(v) : 'text-faint'}`}>{w.trades ? <SplitAmount value={v} mode="narrow" className="tracking-[-0.02em]" /> : '—'}</div>
               <div className="num text-[10px] text-muted">{w.trades ? `${w.trades}` : ' '}</div>
             </div>
           );
