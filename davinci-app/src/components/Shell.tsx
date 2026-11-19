@@ -34,7 +34,7 @@ export function Shell({ children }: { children: ReactNode }) {
         style={{ width: `calc(${sidebarW}px + var(--safe-left))`, paddingLeft: 'var(--safe-left)', paddingTop: 'var(--safe-top)' }}
       >
         <div className={`flex h-16 items-center ${collapsed ? 'justify-center' : 'px-5'}`}>
-          <Wordmark collapsed={collapsed} />
+          <Wordmark collapsed={collapsed} subtitle />
         </div>
         <nav className="flex flex-1 flex-col gap-1 px-3 pt-2" aria-label="Ana menü">
           {NAV.map(({ to, label, icon: Icon }) => (
